@@ -75,14 +75,19 @@ def healthz():
             status_text = "PASS" if ok else "FAIL"
             lines.append(f"{name:<30}{status_text:<8}{msg}")
         return HTTPResponse("\n".join(lines), status=code, content_type="text/plain")
+    
+    # Modified JSON response block
+    checks_list = [
+        {"name": name, "status": "ok" if ok else "error", "message": msg}
+        for name, ok, msg in results
+    ]
 
     body = {
         "status": "ok" if not failed else "error",
-        "data": {"message": "All checks passed" if not failed else "Some checks failed"},
-        "checks": [
-            {"name": name, "status": "ok" if ok else "error", "message": msg}
-            for name, ok, msg in results
-        ]
+        "data": {
+            "message": "All checks passed" if not failed else "Some checks failed",
+            "checks": checks_list  # Moved the checks list here
+        }
     }
     return HTTPResponse(json.dumps(body, indent=2), status=code, content_type='application/json')
 

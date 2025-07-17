@@ -6,7 +6,7 @@ This Python script provides a lightweight HTTP service for exposing health statu
 
 ## ✨ Features
 
-- `/healthz`: 
+- `/healthz`:
   - Return code: Healthy `200`, Unhealthy `500`
   - Output: `Plaintext`, `JSON`
 - `/metrics`: Exposes Prometheus metrics
@@ -41,8 +41,6 @@ Service endpoints available:
   Healthcheck (JSON):  http://0.0.0.0:8080/healthz?format=json
   Prometheus metrics:  http://0.0.0.0:8080/metrics
 ```
-
----
 
 ## ✅ Healthcheck
 
@@ -87,45 +85,45 @@ http://127.0.0.1:8080/healthz?format=json
 {
   "status": "ok",
   "data": {
-    "message": "All checks passed"
-  },
-  "checks": [
-    {
-      "name": "db_connection",
-      "status": "ok",
-      "message": "Database is connected"
-    },
-    {
-      "name": "config_service",
-      "status": "ok",
-      "message": "Config service is reachable"
-    },
-    {
-      "name": "internal_api/user",
-      "status": "ok",
-      "message": "internal_api/user OK (255ms)"
-    },
-    {
-      "name": "internal_api/payment",
-      "status": "ok",
-      "message": "internal_api/payment OK (170ms)"
-    },
-    {
-      "name": "external_api/wechat_pay",
-      "status": "ok",
-      "message": "external_api/wechat_pay OK (221ms)"
-    },
-    {
-      "name": "external_api/sms_provider",
-      "status": "ok",
-      "message": "external_api/sms_provider OK (90ms)"
-    },
-    {
-      "name": "endtoend_workflow",
-      "status": "ok",
-      "message": "Workflow executed successfully"
-    }
-  ]
+    "message": "All checks passed",
+    "checks": [
+      {
+        "name": "db_connection",
+        "status": "ok",
+        "message": "Database is connected"
+      },
+      {
+        "name": "config_service",
+        "status": "ok",
+        "message": "Config service is reachable"
+      },
+      {
+        "name": "internal_api/user",
+        "status": "ok",
+        "message": "internal_api/user OK (255ms)"
+      },
+      {
+        "name": "internal_api/payment",
+        "status": "ok",
+        "message": "internal_api/payment OK (170ms)"
+      },
+      {
+        "name": "external_api/wechat_pay",
+        "status": "ok",
+        "message": "external_api/wechat_pay OK (221ms)"
+      },
+      {
+        "name": "external_api/sms_provider",
+        "status": "ok",
+        "message": "external_api/sms_provider OK (90ms)"
+      },
+      {
+        "name": "endtoend_workflow",
+        "status": "ok",
+        "message": "Workflow executed successfully"
+      }
+    ]
+  }
 }
 ```
 
@@ -135,45 +133,45 @@ http://127.0.0.1:8080/healthz?format=json
 {
   "status": "error",
   "data": {
-    "message": "Some checks failed"
-  },
-  "checks": [
-    {
-      "name": "db_connection",
-      "status": "ok",
-      "message": "Database is connected"
-    },
-    {
-      "name": "config_service",
-      "status": "ok",
-      "message": "Config service is reachable"
-    },
-    {
-      "name": "internal_api/user",
-      "status": "error",
-      "message": "internal_api/user returned error"
-    },
-    {
-      "name": "internal_api/payment",
-      "status": "ok",
-      "message": "internal_api/payment OK (170ms)"
-    },
-    {
-      "name": "external_api/wechat_pay",
-      "status": "ok",
-      "message": "external_api/wechat_pay OK (221ms)"
-    },
-    {
-      "name": "external_api/sms_provider",
-      "status": "ok",
-      "message": "external_api/sms_provider OK (90ms)"
-    },
-    {
-      "name": "endtoend_workflow",
-      "status": "error",
-      "message": "Skipped due to upstream failure"
-    }
-  ]
+    "message": "Some checks failed",
+    "checks": [
+      {
+        "name": "db_connection",
+        "status": "ok",
+        "message": "Database is connected"
+      },
+      {
+        "name": "config_service",
+        "status": "ok",
+        "message": "Config service is reachable"
+      },
+      {
+        "name": "internal_api/user",
+        "status": "error",
+        "message": "internal_api/user returned error"
+      },
+      {
+        "name": "internal_api/payment",
+        "status": "ok",
+        "message": "internal_api/payment OK (170ms)"
+      },
+      {
+        "name": "external_api/wechat_pay",
+        "status": "ok",
+        "message": "external_api/wechat_pay OK (221ms)"
+      },
+      {
+        "name": "external_api/sms_provider",
+        "status": "ok",
+        "message": "external_api/sms_provider OK (90ms)"
+      },
+      {
+        "name": "endtoend_workflow",
+        "status": "error",
+        "message": "Skipped due to upstream failure"
+      }
+    ]
+  }
 }
 ```
 
