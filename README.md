@@ -6,13 +6,15 @@ This Python script provides a lightweight HTTP service for exposing health statu
 
 ## ✨ Features
 
-- `/healthz`: Returns health status Text by default and JSON by `?format=json`
+- `/healthz`: 
+  - Return code: Healthy `200`, Unhealthy `500`
+  - Output: `Plaintext`, `JSON`
 - `/metrics`: Exposes Prometheus metrics
 - Simulates dependency checks for:
   - 🔌 Database connection
   - ⚙️ Config service
-  - 🔁 Internal APIs (`user`, `payment`)
-  - 🌍 External APIs (`wechat_pay`, `sms_provider`)
+  - 🔁 Internal APIs
+  - 🌍 External APIs
   - 🏁 End to End Workflow
 - Dependencies have built-in error probability and timeout simulation
 - Fully compatible with Kubernetes probes and Prometheus scraping
