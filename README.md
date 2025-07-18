@@ -6,7 +6,7 @@
   - Return code: Healthy `200`, Unhealthy `500`
   - Output: `Plaintext`, `JSON`
 - `/metrics`: Prometheus metrics
-- **Two-tier health check system**:
+- **Two-tier health checks**:
   - 🔴 **Critical checks** Affect overall health:
     - 🔌 Database connection: Core dependency, must be healthy
     - ⚙️ Config service: Core dependency, must be healthy  
