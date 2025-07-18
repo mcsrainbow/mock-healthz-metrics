@@ -1,7 +1,5 @@
 # 🩺 Mock /healthz and /metrics
 
----
-
 ## ✨ Features
 
 - `/healthz`:
