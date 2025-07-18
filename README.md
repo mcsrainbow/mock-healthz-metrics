@@ -1,6 +1,4 @@
-# 🩺 Healthz & Metrics Endpoint for Microservices
-
-This Python script provides a lightweight HTTP service for exposing health status and Prometheus metrics.
+# 🩺 Mock /healthz and /metrics
 
 ---
 
@@ -9,15 +7,22 @@ This Python script provides a lightweight HTTP service for exposing health statu
 - `/healthz`:
   - Return code: Healthy `200`, Unhealthy `500`
   - Output: `Plaintext`, `JSON`
-- `/metrics`: Exposes Prometheus metrics
-- Simulates dependency checks for:
-  - 🔌 Database connection
-  - ⚙️ Config service
-  - 🔁 Internal APIs
-  - 🌍 External APIs
-  - 🏁 End to End Workflow
+- `/metrics`: Prometheus metrics
+- **Two-tier health check system**:
+  - 🔴 **Critical checks** Affect overall health:
+    - 🔌 Database connection: Core dependency, must be healthy
+    - ⚙️ Config service: Core dependency, must be healthy  
+    - 🔁 Internal APIs (`billing`, `usage`): Depend on upstream services (DB + Config), skipped if upstream fails
+  - 🟡 **External checks** Independent:
+    - 🌍 External APIs (`alipay`, `sms`): Run independently, don't affect overall health status
 - Dependencies have built-in error probability and timeout simulation
 - Fully compatible with Kubernetes probes and Prometheus scraping
+
+### Dependency Chain
+```
+Database + Config Service → Internal APIs → Overall Health Status
+External APIs → Independent Monitoring Only
+```
 
 ---
 
@@ -32,7 +37,7 @@ pip install bottle
 ### 2. Run the script
 
 ```bash
-python mock_healthz_server.py
+python mock-healthz-metrics.py
 ```
 
 ```text
@@ -52,27 +57,29 @@ http://127.0.0.1:8080/healthz?format=text
 #### Healthy:
 
 ```
-Component                     Status  Detail
-db_connection                 PASS    Database is connected
-config_service                PASS    Config service is reachable
-internal_api/user             PASS    internal_api/user OK (200ms)
-internal_api/payment          PASS    internal_api/payment OK (333ms)
-external_api/wechat_pay       PASS    external_api/wechat_pay OK (305ms)
-external_api/sms_provider     PASS    external_api/sms_provider OK (174ms)
-endtoend_workflow             PASS    Workflow executed successfully
+CHECK                   STATUS  MESSAGE
+----- Critical -----
+db_connection           PASS    Database is connected
+config_service          PASS    Config service is reachable
+internal_api/billing    PASS    internal_api/billing OK (392ms)
+internal_api/usage      PASS    internal_api/usage OK (348ms)
+----- External -----
+external_api/alipay     PASS    external_api/alipay OK (308ms)
+external_api/sms        FAIL    external_api/sms timed out
 ```
 
 #### Unhealthy:
 
 ```
-Component                     Status  Detail
-db_connection                 PASS    Database is connected
-config_service                PASS    Config service is reachable
-internal_api/user             FAIL    internal_api/user returned error
-internal_api/payment          PASS    internal_api/payment OK (126ms)
-external_api/wechat_pay       PASS    external_api/wechat_pay OK (395ms)
-external_api/sms_provider     PASS    external_api/sms_provider OK (464ms)
-endtoend_workflow             FAIL    Skipped due to upstream failure
+CHECK                   STATUS  MESSAGE
+----- Critical -----
+db_connection           PASS    Database is connected
+config_service          PASS    Config service is reachable
+internal_api/billing    PASS    internal_api/billing OK (253ms)
+internal_api/usage      FAIL    internal_api/usage returned error
+----- External -----
+external_api/alipay     PASS    external_api/alipay OK (101ms)
+external_api/sms        PASS    external_api/sms OK (183ms)
 ```
 
 ### JSON Format
@@ -85,44 +92,43 @@ http://127.0.0.1:8080/healthz?format=json
 {
   "status": "ok",
   "data": {
-    "message": "All checks passed",
-    "checks": [
-      {
-        "name": "db_connection",
-        "status": "ok",
-        "message": "Database is connected"
-      },
-      {
-        "name": "config_service",
-        "status": "ok",
-        "message": "Config service is reachable"
-      },
-      {
-        "name": "internal_api/user",
-        "status": "ok",
-        "message": "internal_api/user OK (255ms)"
-      },
-      {
-        "name": "internal_api/payment",
-        "status": "ok",
-        "message": "internal_api/payment OK (170ms)"
-      },
-      {
-        "name": "external_api/wechat_pay",
-        "status": "ok",
-        "message": "external_api/wechat_pay OK (221ms)"
-      },
-      {
-        "name": "external_api/sms_provider",
-        "status": "ok",
-        "message": "external_api/sms_provider OK (90ms)"
-      },
-      {
-        "name": "endtoend_workflow",
-        "status": "ok",
-        "message": "Workflow executed successfully"
-      }
-    ]
+    "message": "All critical checks passed",
+    "checks": {
+      "critical": [
+        {
+          "name": "db_connection",
+          "status": "ok",
+          "message": "Database is connected"
+        },
+        {
+          "name": "config_service",
+          "status": "ok",
+          "message": "Config service is reachable"
+        },
+        {
+          "name": "internal_api/billing",
+          "status": "ok",
+          "message": "internal_api/billing OK (392ms)"
+        },
+        {
+          "name": "internal_api/usage",
+          "status": "ok",
+          "message": "internal_api/usage OK (348ms)"
+        }
+      ],
+      "external": [
+        {
+          "name": "external_api/alipay",
+          "status": "ok",
+          "message": "external_api/alipay OK (308ms)"
+        },
+        {
+          "name": "external_api/sms",
+          "status": "error",
+          "message": "external_api/sms timed out"
+        }
+      ]
+    }
   }
 }
 ```
@@ -131,46 +137,45 @@ http://127.0.0.1:8080/healthz?format=json
 
 ```json
 {
-  "status": "error",
+  "status": "ok",
   "data": {
-    "message": "Some checks failed",
-    "checks": [
-      {
-        "name": "db_connection",
-        "status": "ok",
-        "message": "Database is connected"
-      },
-      {
-        "name": "config_service",
-        "status": "ok",
-        "message": "Config service is reachable"
-      },
-      {
-        "name": "internal_api/user",
-        "status": "error",
-        "message": "internal_api/user returned error"
-      },
-      {
-        "name": "internal_api/payment",
-        "status": "ok",
-        "message": "internal_api/payment OK (170ms)"
-      },
-      {
-        "name": "external_api/wechat_pay",
-        "status": "ok",
-        "message": "external_api/wechat_pay OK (221ms)"
-      },
-      {
-        "name": "external_api/sms_provider",
-        "status": "ok",
-        "message": "external_api/sms_provider OK (90ms)"
-      },
-      {
-        "name": "endtoend_workflow",
-        "status": "error",
-        "message": "Skipped due to upstream failure"
-      }
-    ]
+    "message": "All critical checks passed",
+    "checks": {
+      "critical": [
+        {
+          "name": "db_connection",
+          "status": "ok",
+          "message": "Database is connected"
+        },
+        {
+          "name": "config_service",
+          "status": "ok",
+          "message": "Config service is reachable"
+        },
+        {
+          "name": "internal_api/billing",
+          "status": "ok",
+          "message": "internal_api/billing OK (253ms)"
+        },
+        {
+          "name": "internal_api/usage",
+          "status": "error",
+          "message": "internal_api/usage returned error"
+        }
+      ],
+      "external": [
+        {
+          "name": "external_api/alipay",
+          "status": "ok",
+          "message": "external_api/alipay OK (101ms)"
+        },
+        {
+          "name": "external_api/sms",
+          "status": "ok",
+          "message": "external_api/sms OK (183ms)"
+        }
+      ]
+    }
   }
 }
 ```
@@ -197,13 +202,12 @@ This will scrape `http://127.0.0.1:8080/metrics` by default.
 ```
 # HELP healthcheck_status Health check status (1=ok,0=error)
 # TYPE healthcheck_status gauge
-healthcheck_status{check="db_connection"} 1
-healthcheck_status{check="config_service"} 1
-healthcheck_status{check="internal_api/user"} 1
-healthcheck_status{check="internal_api/payment"} 1
-healthcheck_status{check="external_api/wechat_pay"} 1
-healthcheck_status{check="external_api/sms_provider"} 1
-healthcheck_status{check="endtoend_workflow"} 1
+healthcheck_status{check="db_connection",type="critical"} 1
+healthcheck_status{check="config_service",type="critical"} 1
+healthcheck_status{check="internal_api/billing",type="critical"} 1
+healthcheck_status{check="internal_api/usage",type="critical"} 1
+healthcheck_status{check="external_api/alipay",type="external"} 1
+healthcheck_status{check="external_api/sms",type="external"} 0
 ```
 
 
@@ -212,13 +216,12 @@ healthcheck_status{check="endtoend_workflow"} 1
 ```
 # HELP healthcheck_status Health check status (1=ok,0=error)
 # TYPE healthcheck_status gauge
-healthcheck_status{check="db_connection"} 1
-healthcheck_status{check="config_service"} 1
-healthcheck_status{check="internal_api/user"} 0
-healthcheck_status{check="internal_api/payment"} 1
-healthcheck_status{check="external_api/wechat_pay"} 1
-healthcheck_status{check="external_api/sms_provider"} 1
-healthcheck_status{check="endtoend_workflow"} 0
+healthcheck_status{check="db_connection",type="critical"} 1
+healthcheck_status{check="config_service",type="critical"} 1
+healthcheck_status{check="internal_api/billing",type="critical"} 0
+healthcheck_status{check="internal_api/usage",type="critical"} 1
+healthcheck_status{check="external_api/alipay",type="external"} 1
+healthcheck_status{check="external_api/sms",type="external"} 1
 ```
 
 ## 🐳 Kubernetes
@@ -245,6 +248,8 @@ readinessProbe:
   successThreshold: 2
   timeoutSeconds: 2
 ```
+
+For more detailed probe design, please refer to the article: [Kubernetes Container Healthcheck and Graceful Termination](https://blog.heylinux.com/en/2024/07/kubernetes-container-healthcheck-and-graceful-termination/)
 
 ## 📌 Notes
 

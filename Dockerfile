@@ -8,10 +8,10 @@ WORKDIR /app
 RUN pip install --no-cache-dir bottle
 
 # Copy application code
-COPY mock_healthz_server.py .
+COPY mock-healthz-metrics.py .
 
 # Expose the HTTP port
 EXPOSE 8080
 
 # Start the server
-CMD ["python", "mock_healthz_server.py"]
+CMD ["python", "mock-healthz-metrics.py"]
