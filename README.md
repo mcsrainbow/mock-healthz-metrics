@@ -1,5 +1,7 @@
 # 🩺 Mock /healthz and /metrics
 
+![featured-image](featured-image.jpeg)
+
 ## ✨ Features
 
 - `/healthz`:
