@@ -15,12 +15,9 @@
     - 🌍 External APIs (`alipay`, `sms`): Run independently, don't affect overall health status
 - Dependencies have built-in error probability and timeout simulation
 - Fully compatible with Kubernetes probes and Prometheus scraping
-
-### Dependency Chain
-```
-Database + Config Service → Internal APIs → Overall Health Status
-External APIs → Independent Monitoring Only
-```
+- **Dependency Chain**:
+  - Database + Config Service → Internal APIs → Overall Health Status  
+  - External APIs → Independent Monitoring Only  
 
 ---
 
@@ -52,7 +49,7 @@ Service endpoints available:
 http://127.0.0.1:8080/healthz  
 http://127.0.0.1:8080/healthz?format=text  
 
-#### Healthy:
+**Healthy**
 
 ```
 CHECK                   STATUS  MESSAGE
@@ -66,7 +63,7 @@ external_api/alipay     PASS    external_api/alipay OK (308ms)
 external_api/sms        FAIL    external_api/sms timed out
 ```
 
-#### Unhealthy:
+**Unhealthy**
 
 ```
 CHECK                   STATUS  MESSAGE
@@ -84,7 +81,7 @@ external_api/sms        PASS    external_api/sms OK (183ms)
 
 http://127.0.0.1:8080/healthz?format=json
 
-#### Healthy:
+**Healthy**
 
 ```json
 {
@@ -131,7 +128,7 @@ http://127.0.0.1:8080/healthz?format=json
 }
 ```
 
-#### Unhealthy:
+**Unhealthy**
 
 ```json
 {
@@ -182,7 +179,7 @@ http://127.0.0.1:8080/healthz?format=json
 
 http://127.0.0.1:8080/metrics
 
-### Config
+**Config**
 
 ```yaml
 scrape_configs:
@@ -193,9 +190,9 @@ scrape_configs:
 
 This will scrape `http://127.0.0.1:8080/metrics` by default.
 
-### Metrics
+**Metrics**
 
-#### Healthy:
+**Healthy**
 
 ```
 # HELP healthcheck_status Health check status (1=ok,0=error)
@@ -209,7 +206,7 @@ healthcheck_status{check="external_api/sms",type="external"} 0
 ```
 
 
-#### Unhealthy:
+**Unhealthy**
 
 ```
 # HELP healthcheck_status Health check status (1=ok,0=error)
@@ -225,6 +222,22 @@ healthcheck_status{check="external_api/sms",type="external"} 1
 ## 🐳 Kubernetes
 
 For Kubernetes livenessProbe and readinessProbe:
+
+```bash
+❯ curl -I http://127.0.0.1:8080/healthz
+HTTP/1.0 200 OK
+Date: Fri, 18 Jul 2025 03:43:31 GMT
+Server: WSGIServer/0.2 CPython/3.11.11
+Content-Type: text/plain
+Content-Length: 444
+
+❯ curl -I http://127.0.0.1:8080/healthz
+HTTP/1.0 500 Internal Server Error
+Date: Fri, 18 Jul 2025 03:43:36 GMT
+Server: WSGIServer/0.2 CPython/3.11.11
+Content-Type: text/plain
+Content-Length: 438
+```
 
 ```yaml
 livenessProbe:
