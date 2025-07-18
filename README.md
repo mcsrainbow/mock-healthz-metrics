@@ -188,7 +188,7 @@ scrape_configs:
       - targets: ['127.0.0.1:8080']
 ```
 
-This will scrape `http://127.0.0.1:8080/metrics` by default.
+Scrape `http://127.0.0.1:8080/metrics` by default.
 
 **Metrics**
 
@@ -260,7 +260,7 @@ readinessProbe:
   timeoutSeconds: 2
 ```
 
-For more detailed probe design, please refer to the article: [Kubernetes Container Healthcheck and Graceful Termination](https://blog.heylinux.com/en/2024/07/kubernetes-container-healthcheck-and-graceful-termination/)
+For more detailed probe design, please refer to the article: [Kubernetes Container Healthcheck and Graceful Termination](https://blog.heylinux.com/en/2024/07/kubernetes-container-healthcheck-and-graceful-termination/).
 
 ## 📌 Notes
 
