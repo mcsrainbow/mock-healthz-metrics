@@ -7,7 +7,7 @@
   - Output: `Plaintext`, `JSON`
 - `/metrics`: Prometheus metrics
 - **Two-tier health checks**:
-  - 🔴 **Critical checks** Affect overall health:
+  - 🔴 **Critical checks** Affect overall health status:
     - 🔌 Database connection: Core dependency, must be healthy
     - ⚙️ Config service: Core dependency, must be healthy  
     - 🔁 Internal APIs (`billing`, `usage`): Depend on upstream services (DB + Config), skipped if upstream fails
