@@ -10,9 +10,9 @@
   - 🔴 **Critical checks** Affect overall health status:
     - 🔌 Database connection: Core dependency, must be healthy
     - ⚙️ Config service: Core dependency, must be healthy  
-    - 🔁 Internal APIs (`billing`, `usage`): Depend on upstream services (DB + Config), skipped if upstream fails
+    - 🔁 Internal APIs `billing`, `usage`: Depend on upstream services (DB + Config), skipped if upstream fails
   - 🟡 **External checks** Independent:
-    - 🌍 External APIs (`alipay`, `sms`): Run independently, don't affect overall health status
+    - 🌍 External APIs `alipay`, `sms`: Run independently, don't affect overall health status
 - Dependencies have built-in error probability and timeout simulation
 - Fully compatible with Kubernetes probes and Prometheus scraping
 - **Dependency Chain**:
