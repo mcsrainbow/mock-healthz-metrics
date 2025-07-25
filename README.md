@@ -54,29 +54,33 @@ http://127.0.0.1:8080/healthz?format=text
 **Healthy**
 
 ```
+HEALTH CHECK SNAPSHOT [2025-07-25 19:03:15]
+-------------------------------------------
 CHECK                   STATUS  MESSAGE
------ Critical -----
-db_connection           PASS    Database is connected
-config_service          PASS    Config service is reachable
-internal_api/billing    PASS    internal_api/billing OK (392ms)
-internal_api/usage      PASS    internal_api/usage OK (348ms)
------ External -----
-external_api/alipay     PASS    external_api/alipay OK (308ms)
-external_api/sms        FAIL    external_api/sms timed out
+----- CRITICAL -----
+db_connection           ✔       Database is connected
+config_service          ✔       Config service is reachable
+internal_api/billing    ✔       internal_api/billing OK (392ms)
+internal_api/usage      ✔       internal_api/usage OK (348ms)
+----- EXTERNAL -----
+external_api/alipay     ✖       external_api/alipay OK (308ms)
+external_api/sms        ✔       external_api/sms timed out
 ```
 
 **Unhealthy**
 
 ```
+HEALTH CHECK SNAPSHOT [2025-07-25 19:03:27]
+-------------------------------------------
 CHECK                   STATUS  MESSAGE
------ Critical -----
-db_connection           PASS    Database is connected
-config_service          PASS    Config service is reachable
-internal_api/billing    PASS    internal_api/billing OK (253ms)
-internal_api/usage      FAIL    internal_api/usage returned error
------ External -----
-external_api/alipay     PASS    external_api/alipay OK (101ms)
-external_api/sms        PASS    external_api/sms OK (183ms)
+----- CRITICAL -----
+db_connection           ✔       Database is connected
+config_service          ✔       Config service is reachable
+internal_api/billing    ✔       internal_api/billing OK (253ms)
+internal_api/usage      ✔       internal_api/usage returned error
+----- EXTERNAL -----
+external_api/alipay     ✖       external_api/alipay OK (101ms)
+external_api/sms        ✔       external_api/sms OK (183ms)
 ```
 
 ### JSON Format
@@ -90,6 +94,7 @@ http://127.0.0.1:8080/healthz?format=json
   "status": "ok",
   "data": {
     "message": "All critical checks passed",
+    "snapshot_time": "2025-07-25 19:03:15",
     "checks": {
       "critical": [
         {
@@ -137,6 +142,7 @@ http://127.0.0.1:8080/healthz?format=json
   "status": "ok",
   "data": {
     "message": "All critical checks passed",
+    "snapshot_time": "2025-07-25 19:03:27",
     "checks": {
       "critical": [
         {
