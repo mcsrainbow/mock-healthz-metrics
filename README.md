@@ -139,7 +139,7 @@ http://127.0.0.1:8080/healthz?format=json
 
 ```json
 {
-  "status": "ok",
+  "status": "error",
   "data": {
     "message": "Some critical checks failed",
     "snapshot_time": "2025-07-25 19:03:27",
