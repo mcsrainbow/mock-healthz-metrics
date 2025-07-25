@@ -11,15 +11,15 @@
 - **Two-tier health checks**:
   - 🔴 **Critical checks** Affect overall health status:
     - 🔌 Database connection: Core dependency, must be healthy
-    - ⚙️ Config service: Core dependency, must be healthy  
+    - ⚙️ Config service: Core dependency, must be healthy
     - 🔁 Internal APIs `billing`, `usage`: Depend on upstream services (DB + Config), skipped if upstream fails
   - 🟡 **External checks** Independent:
     - 🌍 External APIs `alipay`, `sms`: Run independently, don't affect overall health status
 - Dependencies have built-in error probability and timeout simulation
 - Fully compatible with Kubernetes probes and Prometheus scraping
 - **Dependency Chain**:
-  - Database + Config Service → Internal APIs → Overall Health Status  
-  - External APIs → Independent Monitoring Only  
+  - Database + Config Service → Internal APIs → Overall Health Status
+  - External APIs → Independent Monitoring Only
 
 ---
 
@@ -141,7 +141,7 @@ http://127.0.0.1:8080/healthz?format=json
 {
   "status": "ok",
   "data": {
-    "message": "All critical checks passed",
+    "message": "Some critical checks failed",
     "snapshot_time": "2025-07-25 19:03:27",
     "checks": {
       "critical": [
