@@ -19,7 +19,7 @@ last_check_results = {
 CHECK_TIMEOUT = 5
 
 # Background check interval (seconds)
-CHECK_INTERVAL = 5
+CHECK_INTERVAL = 15
 
 def check_db_connection():
     """
@@ -31,7 +31,7 @@ def check_db_connection():
     if random.random() < 0.02:
         time.sleep(CHECK_TIMEOUT + 1)
         return ("db_connection", False, "db_connection timed out")
-    
+
     # Simulate connection success/failure
     ok = random.random() < 0.98
     msg = "Database is connected" if ok else "Database connection failed"
@@ -47,7 +47,7 @@ def check_config_service():
     if random.random() < 0.02:
         time.sleep(CHECK_TIMEOUT + 1)
         return ("config_service", False, "config_service timed out")
-    
+
     # Simulate service availability
     ok = random.random() < 0.98
     msg = "Config service is reachable" if ok else "Config service error"
@@ -64,7 +64,7 @@ def check_apis(api_list, prefix):
     for name in api_list:
         timeout = random.random() < 0.02  # ~2% timeout rate
         svc = f"{prefix}/{name}"
-        
+
         if timeout:
             # Simulate timeout by exceeding the check timeout
             time.sleep(CHECK_TIMEOUT + 1)
@@ -99,7 +99,7 @@ def run_checks():
             "config_service": executor.submit(check_config_service)
         }
         critical_results = []
-        
+
         # Collect critical check results with timeout handling
         for name, future in critical_futures.items():
             try:
@@ -164,13 +164,13 @@ def healthz():
     - JSON format: Structured data for programmatic consumption
     """
     fmt = request.query.get("format")
-    
+
     # Read from cached results for better performance
     critical_results = last_check_results["critical"]
     external_results = last_check_results["external"]
     ts = last_check_results["timestamp"]
     snapshot_str = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ts))
-    
+
     # Determine overall health status based on critical checks
     failed = any(not ok for _, ok, _ in critical_results)
     code = 500 if failed else 200
@@ -204,19 +204,19 @@ def healthz():
     border = "-" * len(title)
     table_header = f"{'CHECK':<24}{'STATUS':<8}MESSAGE"
     lines = [title, border, table_header]
-    
+
     # Format critical checks section
     lines.append("----- CRITICAL -----")
     for name, ok, msg in critical_results:
         status_text = "✔" if ok else "✖"
         lines.append(f"{name:<24}{status_text:<8}{msg}")
-    
+
     # Format external checks section
     lines.append("----- EXTERNAL -----")
     for name, ok, msg in external_results:
         status_text = "✔" if ok else "✖"
         lines.append(f"{name:<24}{status_text:<8}{msg}")
-    
+
     return HTTPResponse("\n".join(lines), status=code, content_type='text/plain')
 
 @route('/metrics')
@@ -230,21 +230,21 @@ def metrics():
     # Read from cached results
     critical_results = last_check_results["critical"]
     external_results = last_check_results["external"]
-    
+
     # Prometheus metrics format
     lines = [
         "# HELP healthcheck_status Health check status (1=ok,0=error)",
         "# TYPE healthcheck_status gauge"
     ]
-    
+
     # Export critical check metrics
     for name, ok, _ in critical_results:
         lines.append(f'healthcheck_status{{check="{name}",type="critical"}} {1 if ok else 0}')
-    
+
     # Export external check metrics
     for name, ok, _ in external_results:
         lines.append(f'healthcheck_status{{check="{name}",type="external"}} {1 if ok else 0}')
-    
+
     return HTTPResponse("\n".join(lines), content_type='text/plain')
 
 if __name__ == '__main__':
