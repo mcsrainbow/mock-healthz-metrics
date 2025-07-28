@@ -17,6 +17,9 @@ last_check_results = {
 # Maximum timeout per check (seconds)
 CHECK_TIMEOUT = 5
 
+# Background check interval (seconds)
+CHECK_INTERVAL = 5
+
 def check_db_connection():
     # Simulate timeout
     if random.random() < 0.02:
@@ -104,20 +107,20 @@ def run_checks():
     return critical_results, external_results
 
 # Background thread to periodically refresh check results
-def background_check_loop(interval=5):
+def background_check_loop():
     while True:
         critical, external = run_checks()
         last_check_results["critical"] = critical
         last_check_results["external"] = external
         last_check_results["timestamp"] = time.time()
-        time.sleep(interval)
+        time.sleep(CHECK_INTERVAL)
 
 # Start the background thread
 threading.Thread(target=background_check_loop, daemon=True).start()
 
 @route('/healthz')
 def healthz():
-    fmt = request.query.get("format", "text")
+    fmt = request.query.get("format")
     # Only read from the cache, do not run checks in real time
     critical_results = last_check_results["critical"]
     external_results = last_check_results["external"]
@@ -126,42 +129,44 @@ def healthz():
     failed = any(not ok for _, ok, _ in critical_results)
     code = 500 if failed else 200
 
-    if fmt == "text":
-        title = f"HEALTH CHECK SNAPSHOT [{snapshot_str}]"
-        border = "-" * len(title)
-        table_header = f"{'CHECK':<24}{'STATUS':<8}MESSAGE"
-        lines = [title, border, table_header]
-        lines.append("----- CRITICAL -----")
-        for name, ok, msg in critical_results:
-            status_text = "✔" if ok else "✖"
-            lines.append(f"{name:<24}{status_text:<8}{msg}")
-        lines.append("----- EXTERNAL -----")
-        for name, ok, msg in external_results:
-            status_text = "✔" if ok else "✖"
-            lines.append(f"{name:<24}{status_text:<8}{msg}")
-        return HTTPResponse("\n".join(lines), status=code, content_type='text/plain')
-
-    # JSON format with separated critical and external checks
-    critical_checks = [
-        {"name": name, "status": "ok" if ok else "error", "message": msg}
-        for name, ok, msg in critical_results
-    ]
-    external_checks = [
-        {"name": name, "status": "ok" if ok else "error", "message": msg}
-        for name, ok, msg in external_results
-    ]
-    body = {
-        "status": "ok" if not failed else "error",
-        "data": {
-            "message": "All critical checks passed" if not failed else "Some critical checks failed",
-            "snapshot_time": snapshot_str,
-            "checks": {
-                "critical": critical_checks,
-                "external": external_checks
+    # Only output JSON if explicitly requested with format=json
+    if fmt == "json":
+        # JSON format with separated critical and external checks
+        critical_checks = [
+            {"name": name, "status": "ok" if ok else "error", "message": msg}
+            for name, ok, msg in critical_results
+        ]
+        external_checks = [
+            {"name": name, "status": "ok" if ok else "error", "message": msg}
+            for name, ok, msg in external_results
+        ]
+        body = {
+            "status": "ok" if not failed else "error",
+            "data": {
+                "message": "All critical checks passed" if not failed else "Some critical checks failed",
+                "snapshot_time": snapshot_str,
+                "checks": {
+                    "critical": critical_checks,
+                    "external": external_checks
+                }
             }
         }
-    }
-    return HTTPResponse(json.dumps(body, indent=2), status=code, content_type='application/json')
+        return HTTPResponse(json.dumps(body, indent=2), status=code, content_type='application/json')
+
+    # Default to text format for all other cases (including None, "text", or any other value)
+    title = f"HEALTH CHECK SNAPSHOT [{snapshot_str}]"
+    border = "-" * len(title)
+    table_header = f"{'CHECK':<24}{'STATUS':<8}MESSAGE"
+    lines = [title, border, table_header]
+    lines.append("----- CRITICAL -----")
+    for name, ok, msg in critical_results:
+        status_text = "✔" if ok else "✖"
+        lines.append(f"{name:<24}{status_text:<8}{msg}")
+    lines.append("----- EXTERNAL -----")
+    for name, ok, msg in external_results:
+        status_text = "✔" if ok else "✖"
+        lines.append(f"{name:<24}{status_text:<8}{msg}")
+    return HTTPResponse("\n".join(lines), status=code, content_type='text/plain')
 
 @route('/metrics')
 def metrics():
