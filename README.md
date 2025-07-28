@@ -221,8 +221,8 @@ healthcheck_status{check="external_api/sms",type="external"} 0
 # TYPE healthcheck_status gauge
 healthcheck_status{check="db_connection",type="critical"} 1
 healthcheck_status{check="config_service",type="critical"} 1
-healthcheck_status{check="internal_api/billing",type="critical"} 0
-healthcheck_status{check="internal_api/usage",type="critical"} 1
+healthcheck_status{check="internal_api/billing",type="critical"} 1
+healthcheck_status{check="internal_api/usage",type="critical"} 0
 healthcheck_status{check="external_api/alipay",type="external"} 1
 healthcheck_status{check="external_api/sms",type="external"} 1
 ```
