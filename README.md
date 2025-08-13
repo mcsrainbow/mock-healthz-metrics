@@ -1,6 +1,6 @@
 # 🩺 Mock /healthz and /metrics
 
-![featured-image](featured-image.jpeg)
+![featured-image](featured-image.png)
 
 ## ✨ Features
 
